@@ -24,12 +24,32 @@ const GET_DOG_PIC = async () => {
       const BREED = await READ_FILE_PROMISE(`${__dirname}/dog.txt`);
       console.log(BREED);
       // Make api request with super agent
-      const API_DATA = await SUPER_AGENT.get(
+      //
+      // Create several promise variables
+      const IMG_PRO = SUPER_AGENT.get(
          `https://dog.ceo/api/breed/${BREED}/images/random`
       );
-      const DATA = API_DATA.body.message;
+      const IMG_PRO_1 = SUPER_AGENT.get(
+         `https://dog.ceo/api/breed/${BREED}/images/random`
+      );
+      const IMG_PRO_2 = SUPER_AGENT.get(
+         `https://dog.ceo/api/breed/${BREED}/images/random`
+      );
+      // await promises
+      const ALL_IMAGE_PROMISE_RESPONSES = await Promise.all([
+         IMG_PRO,
+         IMG_PRO_1,
+         IMG_PRO_2,
+      ]);
+      // Save promises.body.message (desired data) to variable
+      const IMAGE_LINKS = ALL_IMAGE_PROMISE_RESPONSES.map(
+         (img) => img.body.message
+      );
+      // Log images and save them as writable data
+      console.log(IMAGE_LINKS);
+      const DATA = IMAGE_LINKS.join('\n');
       console.log(DATA);
-      // Write image to File
+      // Write images to File
       const IMAGE_WRITE = await WRITE_FILE_PROMISE('dog-img.txt', DATA);
       // Log write result to console
       console.log(IMAGE_WRITE);
@@ -37,10 +57,30 @@ const GET_DOG_PIC = async () => {
       // Deal with errors
    } catch (error) {
       console.log(error);
+      // Actually throw the error in the promise response
+      throw error;
    }
+   // promise return
+   return "This is 🐶 GET_DOG_PIC()'s promise, file was read and images were written 📋 ";
 };
 
-GET_DOG_PIC();
+// Implement IEFE (Immediately invoked function expression) to peek process execution
+(async () => {
+   try {
+      console.log('#️⃣ Determining breed...');
+      const RESULT = await GET_DOG_PIC();
+      console.log(RESULT);
+   } catch (error) {
+      console.log('ERROR 🤬 ');
+   }
+})();
+
+// console.log('#️⃣ Determining breed...');
+// GET_DOG_PIC()
+//    .then((result) => {
+//       console.log(result);
+//    })
+//    .catch((err) => console.log('ERROR 🤬 '));
 
 // READ_FILE_PROMISE(`${__dirname}/dog.txt`)
 // // chained promises
